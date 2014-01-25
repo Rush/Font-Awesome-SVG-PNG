@@ -49,11 +49,9 @@ function generateIcon(name, path, params, cb) {
 
   async.eachSeries(sizes, function(siz, cb) {
     var rsvgConvert;
-		rsvgConvert = spawn('rsvg-convdert', ['-f', 'png', '-w', siz]);
-    var outStream = fs.createWriteStream(pathModule.join(argv.color, 'png', siz.toString(), name + '.png'), { flags: 'w',  encoding: "binary"});
-    rsvgConvert.stdout.pipe(outStream);
+    rsvgConvert = spawn('rsvg-convert', ['-f', 'png', '-w', siz, '-o', pathModule.join(argv.color, 'png', siz.toString(), name+'.png')]);
     rsvgConvert.stdin.end(out);
-		rsvgConvert.once('error', cb);
+    rsvgConvert.once('error', cb);
     rsvgConvert.once('exit', cb);
   }, cb);
   var outSvg = fs.createWriteStream(pathModule.join(argv.color, 'svg', name + '.svg'));
