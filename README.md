@@ -15,7 +15,9 @@ Get started at http://fontawesome.io!
 - Font-Awesome-SVG-PNG is licensed under the MIT license
 
 ## How to use?
-You may use already generated icons in `white` and `black` directories. You also generate your own set:
+You may use already generated icons in `white` and `black` directories. You can also generate your own set:
+
+Note: you need to have a command `rsvg-convert` available.
 
 Install by `npm install -g font-awesome-svg-png`:
 
