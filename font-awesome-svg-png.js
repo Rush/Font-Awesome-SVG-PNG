@@ -49,10 +49,11 @@ function generateIcon(name, path, params, cb) {
 
   async.eachSeries(sizes, function(siz, cb) {
     var rsvgConvert;
-		rsvgConvert = spawn('rsvg-convert', ['-f', 'png', '-w', siz]);
-    var outStream = fs.createWriteStream(pathModule.join(argv.color, 'png', siz.toString(), name + '.png'));
+		rsvgConvert = spawn('rsvg-convdert', ['-f', 'png', '-w', siz]);
+    var outStream = fs.createWriteStream(pathModule.join(argv.color, 'png', siz.toString(), name + '.png'), { flags: 'w',  encoding: "binary"});
     rsvgConvert.stdout.pipe(outStream);
     rsvgConvert.stdin.end(out);
+		rsvgConvert.once('error', cb);
     rsvgConvert.once('exit', cb);
   }, cb);
   var outSvg = fs.createWriteStream(pathModule.join(argv.color, 'svg', name + '.svg'));
@@ -87,6 +88,7 @@ request('https://raw2.github.com/FortAwesome/Font-Awesome/master/src/icons.yml',
         cb();
     }, function(err, cb) {
       if(err) {
+				console.log("Make sure 'rsvg-convert' command is available in the PATH");
         return console.log("Error occured:", err);
       }
       console.log("All generated");
@@ -95,12 +97,6 @@ request('https://raw2.github.com/FortAwesome/Font-Awesome/master/src/icons.yml',
   });
 });
 
-process.on('uncaughtException', function(err) {
-	if(err.syscall == 'spawn' && err.code == 'ENOENT') {
-		console.log('rsvg-convert: command not found');
-	}
-	throw err;
-});
 
 
 
