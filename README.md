@@ -25,7 +25,7 @@ The following command will generate a red set of icons at sizes of 128 and 256 p
 `font-awesome-svg-png --color red --sizes 128,256`
 
 ## Windows support
-Everything should work once you have `rsvg-convert.exe`. You may get it from `https://osspack32.googlecode.com/files/rsvg-convert.exe` and move to `%PATH%`.
+Everything should work once you have `rsvg-convert.exe`. You may get it from https://osspack32.googlecode.com/files/rsvg-convert.exe and move to `%PATH%`.
 
 ## MacOSX support
 Untested, let me know if it works.
