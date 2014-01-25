@@ -1,0 +1,17 @@
+{
+  "name": "Font-Awesome-SVG-PNG",
+  "version": "1.0.0",
+  "description": "",
+  "main": "process.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "request": "~2.33.0",
+    "js-yaml": "~3.0.1",
+    "async": "~0.2.10",
+    "graceful-fs": "~2.0.1"
+  }
+}
