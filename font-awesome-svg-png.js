@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 var fs = require('graceful-fs');
 
+
 var template =
-'<svg width="1792" height="1792" viewBox="{shiftX} -256 1792 1792">' +
+'<svg width="{width}" height="{height}" viewBox="{shiftX} {shiftY} {width} {height}">' +
 '<g transform="scale(1 -1) translate(0 -1280)">' +
 '<path d="{path}" fill="{color}" />' +
 '</g>' +
@@ -12,7 +13,7 @@ var spawn = require('child_process').spawn;
 var http = require('http');
 var request = require('request');
 var yaml = require('js-yaml');
-
+var extend = require('extend');
 
 var pathModule = require('path');
 var async = require('async');
@@ -38,24 +39,73 @@ sizes.forEach(function(siz) {
     mkdir(pathModule.join(argv.color, 'png', siz.toString()));
 });
 
+var PIXEL = 128;
+
 function generateIcon(name, path, params, cb) {
   var out = template.substr(0);
   out = out.replace("{path}", path);
-  out = out.replace("{shiftX}", -(1792 - params.advWidth)/2);
-	Object.keys(params).forEach(function(key) {
-		out = out.replace("{" + key + "}", params[key]);
-	});
+
+  function getTemplate(options) {
+    params = extend({}, params, {
+      shiftX: -(14*PIXEL - params.advWidth)/2 - options.paddingLeft,
+      shiftY: -2*PIXEL - options.paddingTop,
+      width: 14*PIXEL + options.paddingLeft + options.paddingRight,
+      height: 14*PIXEL + options.paddingBottom + options.paddingTop,
+    });
+    out = out.substr(0);
+    Object.keys(params).forEach(function(key) {
+      out = out.replace(new RegExp("{" + key + "}", 'g'), params[key]);
+    });
+    return out;
+  }
+
+  function optionsForSize(siz) {
+    var padding;
+
+    var ns = [1, 2, 4, 8, 16];
+    for(var i = 0;i < ns.length;++i) {
+      var n = ns[i];
+      if(siz > n*14 && siz <= n*16) {
+        padding = (siz - n*14)/2 * PIXEL;
+      }
+      else
+        continue;
+
+      if(padding - parseInt(padding) > 0) {
+        padding = 0;
+      }
+      return {
+        paddingTop: padding,
+        paddingBottom: padding,
+        paddingLeft: padding,
+        paddingRight: padding,
+      };
+    };
+    return {
+      paddingTop: 0,
+      paddingBottom: 0,
+      paddingLeft: 0,
+      paddingRight: 0
+    };
+  }
+
+
   console.log("Generating icon", name);
 
   async.eachSeries(sizes, function(siz, cb) {
     var rsvgConvert;
     rsvgConvert = spawn('rsvg-convert', ['-f', 'png', '-w', siz, '-o', pathModule.join(argv.color, 'png', siz.toString(), name+'.png')]);
-    rsvgConvert.stdin.end(out);
+    rsvgConvert.stdin.end(getTemplate(optionsForSize(siz)));
     rsvgConvert.once('error', cb);
     rsvgConvert.once('exit', cb);
   }, cb);
   var outSvg = fs.createWriteStream(pathModule.join(argv.color, 'svg', name + '.svg'));
-  outSvg.end(out);
+  outSvg.end(getTemplate({
+    paddingTop: 0,
+    paddingLeft: 0,
+    paddingBottom: 0,
+    paddingRight: 0
+  }));
 }
 
 console.log("Downloading latest icons.yml ...");
