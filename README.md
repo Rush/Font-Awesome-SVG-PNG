@@ -24,5 +24,11 @@ Install by `npm install -g font-awesome-svg-png`:
 The following command will generate a red set of icons at sizes of 128 and 256 pixels in directory `red`:
 `font-awesome-svg-png --color red --sizes 128,256`
 
+## Windows support
+Everything should work once you have `rsvg-convert.exe`. You may get it from https://osspack32.googlecode.com/files/rsvg-convert.exe and move to `%PATH%`.
+
+## MacOSX support
+Untested, let me know if it works.
+
 ##Authors
   Damian Kaczmarek <damian@codecharm.co.uk>
