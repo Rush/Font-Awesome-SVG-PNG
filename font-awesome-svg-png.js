@@ -3,7 +3,7 @@ var fs = require('graceful-fs');
 
 
 var template =
-'<svg width="{width}" height="{height}" viewBox="{shiftX} {shiftY} {width} {height}">' +
+'<svg width="{width}" height="{height}" viewBox="{shiftX} {shiftY} {width} {height}" xmlns="http://www.w3.org/2000/svg">' +
 '<g transform="scale(1 -1) translate(0 -1280)">' +
 '<path d="{path}" fill="{color}" />' +
 '</g>' +
