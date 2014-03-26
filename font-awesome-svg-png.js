@@ -22,6 +22,10 @@ var code2name = {};
 
 var argv = require('optimist').usage("Usage: $0 -color white").demand(["color"]).describe('sizes', "Provide comma separated sizes to generate").default({sizes: "16,22,24,32,48,64,128,256"}).argv;
 
+var requestOptions = {
+  proxy: process.env.HTTPS_PROXY
+};
+
 function run() {
   var sizes = argv.sizes.toString().split(',');
   function mkdir(dir) {
@@ -109,10 +113,18 @@ function run() {
     }));
   }
 
+
+
   console.log("Downloading latest icons.yml ...");
-  request('https://raw2.github.com/FortAwesome/Font-Awesome/master/src/icons.yml', function(error, response, iconsYaml) {
+  request(extend(true, requestOptions, {
+      url: 'https://raw2.github.com/FortAwesome/Font-Awesome/master/src/icons.yml'
+    }), function(error, response, iconsYaml) {
+    if(error) throw error;
     console.log("Downloading latest fontawesome-webfont.svg ...");
-    request('https://raw2.github.com/FortAwesome/Font-Awesome/master/fonts/fontawesome-webfont.svg', function(error, response, fontData) {
+    request(extend(true, requestOptions, {
+      url: 'https://raw2.github.com/FortAwesome/Font-Awesome/master/fonts/fontawesome-webfont.svg'
+    }), function(error, response, fontData) {
+      if(error) throw error;
       fontData = fontData.toString('utf8');
       var icons = yaml.safeLoad(iconsYaml).icons;
       icons.forEach(function(icon) {
@@ -137,7 +149,7 @@ function run() {
           cb();
       }, function(err, cb) {
         if(err) {
-  				console.log("Make sure 'rsvg-convert' command is available in the PATH");
+          console.log("Make sure 'rsvg-convert' command is available in the PATH");
           return console.log("Error occured:", err);
         }
         console.log("All generated");
@@ -151,4 +163,17 @@ var convertTest = spawn('rsvg-convert', ['--help']);
 convertTest.once('error', function() {
   console.warn("Error: cannot start `rsvg-convert` command. Please install it or verify that it is in your PATH.");
 });
-convertTest.once('exit', run);
+convertTest.once('exit', function() {
+  if(requestOptions.HTTPS_PROXY) return run();
+
+  var npm = spawn('npm', ['config', 'get', 'https-proxy']);
+  npm.stdout.once('data', function(data) {
+    data = data.toString('utf8').split(/\n/)[0];
+    if(data !== 'null' && data !== 'undefined') {
+      console.log("Setting https proxy to '" + data + "'");
+      requestOptions.proxy = data;
+    }
+  });
+  npm.once('exit', run);
+  npm.once('error', run);
+});
