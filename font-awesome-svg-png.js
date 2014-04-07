@@ -159,7 +159,7 @@ function run() {
 
           var m = result.data.match('(<path.*\/>)');
 
-          var svgPath = m[1].replace('path', 'path id="' + name + '"');
+          var svgPath = m[1].replace('path', 'path id="fa-' + name + '"');
           if(outSvgSheet)
             outSvgSheet.write(svgPath.replace(/\s*fill="[^"]+"/, '') + '\n');
 
