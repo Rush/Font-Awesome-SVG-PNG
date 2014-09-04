@@ -1,6 +1,6 @@
 {
   "name": "font-awesome-svg-png",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Font Awesome split to individual SVG and PNG files of different sizes along with Node.JS based generator",
   "main": "font-awesome-svg-png",
   "scripts": {

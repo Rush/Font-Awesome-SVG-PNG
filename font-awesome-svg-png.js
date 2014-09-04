@@ -26,7 +26,7 @@ var async = require('async');
 
 var code2name = {};
 
-var argv = require('optimist').usage("Usage: $0 -color white --sprites").describe('sizes', "Provide comma separated sizes to generate").describe('sprites', 'Generate sprites.svg to use SVG as icons (http://tympanus.net/codrops/2013/11/27/svg-icons-ftw/)').default({sizes: "16,22,24,32,48,64,128,256"}).argv;
+var argv = require('optimist').usage("Usage: $0 -color white --sprites").describe('sizes', "Provide comma separated sizes to generate").describe('sprites', 'Generate sprites.svg to use SVG as icons (http://tympanus.net/codrops/2013/11/27/svg-icons-ftw/)').describe('nopadding', "Do not add padding for PNG pixel perfection").default({sizes: "16,22,24,32,48,64,128,256"}).argv;
 
 if(argv.help || (!argv.color && !argv.sprites)) {
   return console.log(require('optimist').help());
@@ -86,7 +86,7 @@ function run() {
       var padding;
 
       var ns = [1, 2, 4, 8, 16];
-      for(var i = 0;i < ns.length;++i) {
+      for(var i = 0;i < ns.length && !argv.nopadding;++i) {
         var n = ns[i];
         if(siz > n*14 && siz <= n*16) {
           padding = (siz - n*14)/2 * PIXEL;
@@ -121,8 +121,13 @@ function run() {
       workChain.push(function(cb) {
         async.eachSeries(sizes, function(siz, cb) {
           var rsvgConvert;
+          var svgCode = getTemplate(optionsForSize(siz));
           rsvgConvert = spawn('rsvg-convert', ['-f', 'png', '-w', siz, '-o', pathModule.join(argv.color, 'png', siz.toString(), name+'.png')]);
-          rsvgConvert.stdin.end(getTemplate(optionsForSize(siz)));
+					if(process.env.INTERMEDIATE_SVG) {
+            console.log(svgCode);
+						fs.writeFileSync(pathModule.join(argv.color, 'png', siz.toString(), name+'.svg'), svgCode);
+          }
+          rsvgConvert.stdin.end(svgCode);
           rsvgConvert.once('error', cb);
           rsvgConvert.once('exit', cb);
         }, cb);  
