@@ -33,5 +33,11 @@ sudo port install librsvg
 ```
 That should give the necessary `rsvg-convert` command.
 
+## Linux support
+For Debian `rsvg-convert` in located in the `librsvg2-bin` package.
+```sh
+sudo apt-get install librsvg2-bin
+```
+
 ##Authors
   Damian Kaczmarek <damian@codecharm.co.uk>
