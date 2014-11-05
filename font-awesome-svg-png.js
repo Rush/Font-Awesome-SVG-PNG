@@ -184,12 +184,12 @@ function run() {
 
   console.log("Downloading latest icons.yml ...");
   request(extend(true, requestOptions, {
-      url: 'https://raw2.github.com/FortAwesome/Font-Awesome/master/src/icons.yml'
+      url: 'https://raw.github.com/FortAwesome/Font-Awesome/master/src/icons.yml'
     }), function(error, response, iconsYaml) {
     if(error) throw error;
     console.log("Downloading latest fontawesome-webfont.svg ...");
     request(extend(true, requestOptions, {
-      url: 'https://raw2.github.com/FortAwesome/Font-Awesome/master/fonts/fontawesome-webfont.svg'
+      url: 'https://raw.github.com/FortAwesome/Font-Awesome/master/fonts/fontawesome-webfont.svg'
     }), function(error, response, fontData) {
       if(error) throw error;
       fontData = fontData.toString('utf8');
