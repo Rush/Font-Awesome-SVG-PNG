@@ -200,7 +200,7 @@ function run() {
 
       lines = fontData.split('\n');
 
-      async.eachLimit(lines, 4, function(line, cb) {
+      async.eachLimit(lines, process.env['JOBS'] || 1, function(line, cb) {
         var m = line.match(/^<glyph unicode="&#x([^"]+);"\s*(?:horiz-adv-x="(\d+)")?\s*d="([^"]+)"/);
 
         if(m) {
