@@ -9,7 +9,7 @@
   "author": "Damian Kaczmarek <damian@codecharm.co.uk>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/CodeCharmLtd/Font-Awesome-SVG-PNG"
+    "url": "https://github.com/encharm/Font-Awesome-SVG-PNG"
   },
   "bin": {
     "font-awesome-svg-png": "./font-awesome-svg-png.js"
