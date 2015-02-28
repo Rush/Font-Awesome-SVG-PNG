@@ -1,0 +1,25 @@
+{
+  "name": "Font-Awesome-SVG-PNG",
+  "main": "Font-Awesome-SVG-PNG.js",
+  "homepage": "https://github.com/encharm/Font-Awesome-SVG-PNG",
+  "authors": [
+    "Damian Kaczmarek <damian@codecharm.co.uk>"
+  ],
+  "description": "Font Awesome split to individual SVG and PNG files of different sizes along with Node.JS based generator",
+  "keywords": [
+    "svg",
+    "png",
+    "icons",
+    "design",
+    "ui",
+    "font"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
