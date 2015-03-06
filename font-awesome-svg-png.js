@@ -33,6 +33,7 @@ var argv = require('optimist')
   .describe('nopadding', "Do not add padding for PNG pixel perfection")
   .describe('png', "Generate PNG files")
   .describe('svg', "Generate SVG files")
+  .describe('icons', "Optional list of icons to generate, e.g. --icons phone,star")
   .default({
     sizes: "16,22,24,32,48,64,128,256",
     sprites: false,
@@ -206,6 +207,11 @@ function run() {
       if(error) throw error;
       fontData = fontData.toString('utf8');
       var icons = yaml.safeLoad(iconsYaml).icons;
+      if (argv.icons) {
+        icons = icons.filter(function (icon) {
+          return argv.icons.indexOf(icon.id) >= 0;
+        });
+      }
       icons.forEach(function(icon) {
         code2name[icon.unicode] = icon.id;
       });
