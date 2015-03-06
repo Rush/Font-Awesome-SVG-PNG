@@ -26,16 +26,22 @@ Install via Bower: `bower install font-awesome-svg-png`.
 The following command will generate a red set of icons at sizes of 128 and 256 pixels in directory `red`:
 `font-awesome-svg-png --color red --sizes 128,256`
 
-## Windows support
+## PNG creation
+
+PNG creation depends on `rsvg-convert` command being in the path.
+
+You can skip PNG creation with `--no-png`.
+
+### Windows support
 Everything should work once you have `rsvg-convert.exe`. You may get it from https://osspack32.googlecode.com/files/rsvg-convert.exe and move to `%PATH%`.
 
-## Mac OS X support
+### Mac OS X support
 ```
 sudo port install librsvg
 ```
 That should give the necessary `rsvg-convert` command.
 
-## Linux support
+### Linux support
 For Debian `rsvg-convert` in located in the `librsvg2-bin` package.
 ```sh
 sudo apt-get install librsvg2-bin

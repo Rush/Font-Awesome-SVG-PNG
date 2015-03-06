@@ -26,9 +26,22 @@ var async = require('async');
 
 var code2name = {};
 
-var argv = require('optimist').usage("Usage: $0 -color white --sprites").describe('sizes', "Provide comma separated sizes to generate").describe('sprites', 'Generate sprites.svg to use SVG as icons (http://tympanus.net/codrops/2013/11/27/svg-icons-ftw/)').describe('nopadding', "Do not add padding for PNG pixel perfection").default({sizes: "16,22,24,32,48,64,128,256"}).argv;
+var argv = require('optimist')
+  .usage("Usage:\n$0 --sprites\n$0 --color white --no-png\n$0 --color black --no-svg")
+  .describe('sizes', "Provide comma separated sizes to generate")
+  .describe('sprites', 'Generate sprites.svg to use SVG as icons (http://tympanus.net/codrops/2013/11/27/svg-icons-ftw/)')
+  .describe('nopadding', "Do not add padding for PNG pixel perfection")
+  .describe('png', "Generate PNG files")
+  .describe('svg', "Generate SVG files")
+  .describe('icons', "Optional list of icons to generate, e.g. --icons phone,star")
+  .default({
+    sizes: "16,22,24,32,48,64,128,256",
+    sprites: false,
+    png: true,
+    svg: true
+  }).argv;
 
-if(argv.help || (!argv.color && !argv.sprites)) {
+if(argv.help || (!argv.sprites && !argv.color) || (argv.color && !argv.png && !argv.svg)) {
   return console.log(require('optimist').help());
 }
 
@@ -117,7 +130,7 @@ function run() {
 
     var workChain = [];
 
-    if(argv.color) {
+    if(argv.color && argv.png) {
       workChain.push(function(cb) {
         async.eachSeries(sizes, function(siz, cb) {
           var rsvgConvert;
@@ -130,11 +143,11 @@ function run() {
           rsvgConvert.stdin.end(svgCode);
           rsvgConvert.once('error', cb);
           rsvgConvert.once('exit', cb);
-        }, cb);  
+        }, cb);
       });
     }
 
-    if(argv.color) {
+    if(argv.color && argv.svg) {
 
       workChain.push(function(cb) {
 
@@ -176,7 +189,7 @@ function run() {
 
 
     async.parallel(workChain, cb);
-  
+
 
   }
 
@@ -194,6 +207,11 @@ function run() {
       if(error) throw error;
       fontData = fontData.toString('utf8');
       var icons = yaml.safeLoad(iconsYaml).icons;
+      if (argv.icons) {
+        icons = icons.filter(function (icon) {
+          return argv.icons.indexOf(icon.id) >= 0;
+        });
+      }
       icons.forEach(function(icon) {
         code2name[icon.unicode] = icon.id;
       });
@@ -230,21 +248,25 @@ function run() {
   });
 }
 
-var convertTest = spawn('rsvg-convert', ['--help']);
-convertTest.once('error', function() {
-  console.warn("Error: cannot start `rsvg-convert` command. Please install it or verify that it is in your PATH.");
-});
-convertTest.once('exit', function() {
-  if(requestOptions.HTTPS_PROXY) return run();
-
-  var npm = spawn('npm', ['config', 'get', 'https-proxy']);
-  npm.stdout.once('data', function(data) {
-    data = data.toString('utf8').split(/\n/)[0];
-    if(data !== 'null' && data !== 'undefined') {
-      console.log("Setting https proxy to '" + data + "'");
-      requestOptions.proxy = data;
-    }
+if (argv.png) {
+  var convertTest = spawn('rsvg-convert', ['--help']);
+  convertTest.once('error', function() {
+    console.warn("Error: cannot start `rsvg-convert` command. Please install it or verify that it is in your PATH.");
   });
-  npm.once('exit', run);
-  npm.once('error', run);
-});
+  convertTest.once('exit', function() {
+    if(requestOptions.HTTPS_PROXY) return run();
+
+    var npm = spawn('npm', ['config', 'get', 'https-proxy']);
+    npm.stdout.once('data', function(data) {
+      data = data.toString('utf8').split(/\n/)[0];
+      if(data !== 'null' && data !== 'undefined') {
+        console.log("Setting https proxy to '" + data + "'");
+        requestOptions.proxy = data;
+      }
+    });
+    npm.once('exit', run);
+    npm.once('error', run);
+  });
+} else {
+  run();
+}
