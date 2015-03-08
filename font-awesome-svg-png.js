@@ -9,6 +9,8 @@ var parseXml = Promise.promisify(require('xml2js').parseString);
 
 var assert = require('assert');
 
+var execFile = Promise.promisify(require('child_process').execFile);
+
 var svgo = new SVGO({
   removeViewBox: true
 });
@@ -33,22 +35,29 @@ var async = require('async');
 var code2name = {};
 
 var argv = require('optimist')
-  .usage("Usage:\n$0 --sprites\n$0 --color white --no-png\n$0 --color black --no-svg")
+  .usage("Usage:\n  $0 --sprites\n  $0 --color white --no-png\n  $0 --color black --no-svg\n  $0 --sprites --color black,white --optipng")
   .describe('sizes', "Provide comma separated sizes to generate")
+  .describe('color', "Provide color or colors, e.g. --color black,white")
   .describe('sprites', 'Generate sprites.svg to use SVG as icons (http://tympanus.net/codrops/2013/11/27/svg-icons-ftw/)')
   .describe('nopadding', "Do not add padding for PNG pixel perfection")
   .describe('png', "Generate PNG files")
+  .describe('optipng', "Run each file through optipng (need to be installed)")
   .describe('svg', "Generate SVG files")
   .describe('icons', "Optional list of icons to generate, e.g. --icons phone,star")
+  .describe('list', "List available icons")
   .default({
     sizes: "16,22,24,32,48,64,128,256",
     sprites: false,
+    nopadding: false,
+    optipng: false,
     png: true,
     svg: true
   }).argv;
 
-if(argv.help || (!argv.sprites && !argv.color) || (argv.color && !argv.png && !argv.svg)) {
-  return console.log(require('optimist').help());
+if(!argv.list) {
+  if(argv.help || (!argv.sprites && !argv.color) || (argv.color && !argv.png && !argv.svg)) {
+    return console.log(require('optimist').help());
+  }
 }
 
 var requestOptions = {
@@ -87,42 +96,27 @@ function run() {
   }
 
   function optionsForSize(siz) {
-    var padding;
-    var ns = [1, 2, 4, 8, 16];
-    for(var i = 0;i < ns.length && !argv.nopadding;++i) {
-      var n = ns[i];
-      if(siz > n*14 && siz <= n*16) {
-        padding = (siz - n*14)/2 * PIXEL;
-      }
-      else {
-        continue;
-      }
+    var padding = 0;
+    if(!argv.nopadding) {
+      var pad = parseInt(siz / 14)*14;
+      padding = ((siz - pad) / 2) * (PIXEL/2);
+    }
 
-      if(padding - parseInt(padding) > 0) {
-        padding = 0;
-      }
-      return {
-        paddingTop: padding,
-        paddingBottom: padding,
-        paddingLeft: padding,
-        paddingRight: padding,
-      };
-    };
     return {
-      paddingTop: 0,
-      paddingBottom: 0,
-      paddingLeft: 0,
-      paddingRight: 0
+      paddingTop: padding,
+      paddingBottom: padding,
+      paddingLeft: padding,
+      paddingRight: padding,
     };
   }
-
 
   function generatePng(siz, name, params) {
     return new Promise(function(resolve, reject) {
       var rsvgConvert;
       var color = params.color;
       var svgCode = getTemplate(optionsForSize(siz), params);
-      rsvgConvert = spawn('rsvg-convert', ['-f', 'png', '-w', siz, '-o', pathModule.join(color, 'png', siz.toString(), name+'.png')]);
+      var filename = pathModule.join(color, 'png', siz.toString(), name+'.png');
+      rsvgConvert = spawn('rsvg-convert', ['-f', 'png', '-w', siz, '-o', filename]);
       if(process.env.INTERMEDIATE_SVG) {
         fs.writeFileSync(pathModule.join(color, 'png', siz.toString(), name+'.svg'), svgCode);
       }
@@ -130,19 +124,29 @@ function run() {
       rsvgConvert.once('error', reject);
       rsvgConvert.once('exit', function(code) {
         if(code) return reject(code);
-        resolve();
+        resolve(filename);
       });
+    }).then(function(filename) {
+      if(argv.optipng) {
+        return execFile('optipng', [filename]).catch(function(err) {
+          throw Error("Cannot run 'optipng' - is it installed? " + err.code);
+        });
+      }
     });
   }
 
 
   function generatePngs(sizes, name, params) {
+    mkdir(pathModule.join(params.color));
+    mkdir(pathModule.join(params.color, 'png'));
     return Promise.map(sizes, function(siz) {
+      mkdir(pathModule.join(params.color, 'png', siz));
       return generatePng(siz, name, params);
     }, {concurrency: process.env['JOBS'] || 4});
   }
 
   function generateSvg(name, params) {
+    mkdir(pathModule.join(params.color, 'svg'));
     return new Promise(function(resolve, reject) {
       var outSvg = fs.createWriteStream(pathModule.join(params.color, 'svg', name + '.svg'));
       svgo.optimize(getTemplate({
@@ -223,6 +227,12 @@ function run() {
       icons = icons.filter(function (icon) {
         return argv.icons.indexOf(icon.id) >= 0;
       });
+    }
+    if(argv.list) {
+      console.log(icons.map(function(icon) {
+        return icon.id;
+      }));
+      process.exit();
     }
 
     Promise.each(icons, function(icon) {
@@ -307,4 +317,6 @@ Promise.resolve().then(function() {
     promise = promise.then(checkRsvg);
   }
   return promise.then(setupProxy);
-}).then(run);
+}).then(run, function(err) {
+  console.error("Cought error", err);
+});
