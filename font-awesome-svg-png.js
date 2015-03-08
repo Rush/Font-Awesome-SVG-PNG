@@ -3,6 +3,12 @@ var fs = require('graceful-fs');
 
 var SVGO = require('svgo');
 
+var Promise = require("bluebird");
+
+var parseXml = Promise.promisify(require('xml2js').parseString);
+
+var assert = require('assert');
+
 var svgo = new SVGO({
   removeViewBox: true
 });
@@ -17,7 +23,7 @@ var template =
 
 var spawn = require('child_process').spawn;
 var http = require('http');
-var request = require('request');
+var request = require('request-promise');
 var yaml = require('js-yaml');
 var extend = require('extend');
 
@@ -50,6 +56,8 @@ var requestOptions = {
 };
 
 function run() {
+  var color = argv.color;
+
   var sizes = (argv.sizes || '').toString().split(',');
   function mkdir(dir) {
     try {
@@ -60,201 +68,222 @@ function run() {
     }
   }
 
-  if(argv.color) {
-    mkdir(argv.color);
-    mkdir(pathModule.join(argv.color, 'svg'));
-    mkdir(pathModule.join(argv.color, 'png'));
-    sizes.forEach(function(siz) {
-        mkdir(pathModule.join(argv.color, 'png', siz.toString()));
+  var PIXEL = 128;
+
+  
+  function getTemplate(options, params) {
+    var out = template.substr(0);
+    params = extend({}, params, {
+      shiftX: -(-(14*PIXEL - params.advWidth)/2 - options.paddingLeft),
+      shiftY: -(-2*PIXEL - options.paddingTop),
+      width: 14*PIXEL + options.paddingLeft + options.paddingRight,
+      height: 14*PIXEL + options.paddingBottom + options.paddingTop,
+    });
+    out = out.substr(0);
+    Object.keys(params).forEach(function(key) {
+      out = out.replace(new RegExp("{" + key + "}", 'g'), params[key]);
+    });
+    return out;
+  }
+
+  function optionsForSize(siz) {
+    var padding;
+    var ns = [1, 2, 4, 8, 16];
+    for(var i = 0;i < ns.length && !argv.nopadding;++i) {
+      var n = ns[i];
+      if(siz > n*14 && siz <= n*16) {
+        padding = (siz - n*14)/2 * PIXEL;
+      }
+      else {
+        continue;
+      }
+
+      if(padding - parseInt(padding) > 0) {
+        padding = 0;
+      }
+      return {
+        paddingTop: padding,
+        paddingBottom: padding,
+        paddingLeft: padding,
+        paddingRight: padding,
+      };
+    };
+    return {
+      paddingTop: 0,
+      paddingBottom: 0,
+      paddingLeft: 0,
+      paddingRight: 0
+    };
+  }
+
+
+  function generatePng(siz, name, params) {
+    return new Promise(function(resolve, reject) {
+      var rsvgConvert;
+      var color = params.color;
+      var svgCode = getTemplate(optionsForSize(siz), params);
+      rsvgConvert = spawn('rsvg-convert', ['-f', 'png', '-w', siz, '-o', pathModule.join(color, 'png', siz.toString(), name+'.png')]);
+      if(process.env.INTERMEDIATE_SVG) {
+        fs.writeFileSync(pathModule.join(color, 'png', siz.toString(), name+'.svg'), svgCode);
+      }
+      rsvgConvert.stdin.end(svgCode);
+      rsvgConvert.once('error', reject);
+      rsvgConvert.once('exit', function(code) {
+        if(code) return reject(code);
+        resolve();
+      });
     });
   }
 
-  var PIXEL = 128;
 
-  var outSvgSheet;
-  if(argv.sprites) {
-    outSvgSheet = fs.createWriteStream(pathModule.join('sprites.svg'));
-    outSvgSheet.write('<svg height="0" width="0" style="position:absolute;margin-left: -100%;">\n');
+  function generatePngs(sizes, name, params) {
+    return Promise.map(sizes, function(siz) {
+      return generatePng(siz, name, params);
+    }, {concurrency: process.env['JOBS'] || 4});
   }
 
-  function generateIcon(name, path, params, cb) {
-    var out = template.substr(0);
-    out = out.replace("{path}", path);
-
-    function getTemplate(options) {
-      params = extend({}, params, {
-        shiftX: -(-(14*PIXEL - params.advWidth)/2 - options.paddingLeft),
-        shiftY: -(-2*PIXEL - options.paddingTop),
-        width: 14*PIXEL + options.paddingLeft + options.paddingRight,
-        height: 14*PIXEL + options.paddingBottom + options.paddingTop,
-      });
-      out = out.substr(0);
-      Object.keys(params).forEach(function(key) {
-        out = out.replace(new RegExp("{" + key + "}", 'g'), params[key]);
-      });
-      return out;
-    }
-
-    function optionsForSize(siz) {
-      var padding;
-
-      var ns = [1, 2, 4, 8, 16];
-      for(var i = 0;i < ns.length && !argv.nopadding;++i) {
-        var n = ns[i];
-        if(siz > n*14 && siz <= n*16) {
-          padding = (siz - n*14)/2 * PIXEL;
-        }
-        else
-          continue;
-
-        if(padding - parseInt(padding) > 0) {
-          padding = 0;
-        }
-        return {
-          paddingTop: padding,
-          paddingBottom: padding,
-          paddingLeft: padding,
-          paddingRight: padding,
-        };
-      };
-      return {
+  function generateSvg(name, params) {
+    return new Promise(function(resolve, reject) {
+      var outSvg = fs.createWriteStream(pathModule.join(params.color, 'svg', name + '.svg'));
+      svgo.optimize(getTemplate({
         paddingTop: 0,
-        paddingBottom: 0,
         paddingLeft: 0,
+        paddingBottom: 0,
         paddingRight: 0
-      };
-    }
-
-
-    console.log("Generating icon", name);
-
-    var workChain = [];
-
-    if(argv.color && argv.png) {
-      workChain.push(function(cb) {
-        async.eachSeries(sizes, function(siz, cb) {
-          var rsvgConvert;
-          var svgCode = getTemplate(optionsForSize(siz));
-          rsvgConvert = spawn('rsvg-convert', ['-f', 'png', '-w', siz, '-o', pathModule.join(argv.color, 'png', siz.toString(), name+'.png')]);
-					if(process.env.INTERMEDIATE_SVG) {
-            console.log(svgCode);
-						fs.writeFileSync(pathModule.join(argv.color, 'png', siz.toString(), name+'.svg'), svgCode);
-          }
-          rsvgConvert.stdin.end(svgCode);
-          rsvgConvert.once('error', cb);
-          rsvgConvert.once('exit', cb);
-        }, cb);
+      }, params), function(result) {
+        outSvg.end(result.data);
+        resolve();
       });
-    }
+    });
+  }
 
-    if(argv.color && argv.svg) {
+  function generateSprite(name, params) {
+    return new Promise(function(resolve, reject) {
+      svgo.optimize(getTemplate({
+        paddingTop: 0,
+        paddingLeft: 0,
+        paddingBottom: 0,
+        paddingRight: 0
+      }, params), function(result) {
 
-      workChain.push(function(cb) {
+        var m = result.data.match('(<path.*\/>)');
 
-        var outSvg = fs.createWriteStream(pathModule.join(argv.color, 'svg', name + '.svg'));
-        svgo.optimize(getTemplate({
-          paddingTop: 0,
-          paddingLeft: 0,
-          paddingBottom: 0,
-          paddingRight: 0
-        }), function(result) {
+        var svgPath = m[1].replace('path', 'path id="fa-' + name + '"');
 
-          outSvg.end(result.data);
-          cb();
-        });
-
+        resolve(svgPath.replace(/\s*fill="[^"]+"/, ''));
       });
-    }
-    if(argv.sprites) {
-      workChain.push(function(cb) {
-
-        svgo.optimize(getTemplate({
-          paddingTop: 0,
-          paddingLeft: 0,
-          paddingBottom: 0,
-          paddingRight: 0
-        }), function(result) {
-
-          var m = result.data.match('(<path.*\/>)');
-
-          var svgPath = m[1].replace('path', 'path id="fa-' + name + '"');
-          if(outSvgSheet)
-            outSvgSheet.write(svgPath.replace(/\s*fill="[^"]+"/, '') + '\n');
-
-          cb();
-        });
-
-      });
-    }
-
-
-    async.parallel(workChain, cb);
-
-
+    });
   }
 
 
+  function generateIcon(name, params) {
+    console.log("Generating icon", name, "for color", params.color);
+    var workChain = [];
+    if(argv.png) {
+      workChain.push(generatePngs(sizes, name, params));
+    }
+    if(argv.svg) {
+      workChain.push(generateSvg(name, params));
+    }
+    return Promise.all(workChain);
+  }
 
-  console.log("Downloading latest icons.yml ...");
-  request(extend(true, requestOptions, {
-      url: 'https://raw.github.com/FortAwesome/Font-Awesome/master/src/icons.yml'
-    }), function(error, response, iconsYaml) {
-    if(error) throw error;
-    console.log("Downloading latest fontawesome-webfont.svg ...");
-    request(extend(true, requestOptions, {
-      url: 'https://raw.github.com/FortAwesome/Font-Awesome/master/fonts/fontawesome-webfont.svg'
-    }), function(error, response, fontData) {
-      if(error) throw error;
-      fontData = fontData.toString('utf8');
-      var icons = yaml.safeLoad(iconsYaml).icons;
-      if (argv.icons) {
-        icons = icons.filter(function (icon) {
-          return argv.icons.indexOf(icon.id) >= 0;
+  function generateSprites(glyphs) {
+    var outPath = pathModule.join('sprites.svg');
+    console.log('Generating sprites to', outPath);
+    var workChain = [];
+    glyphs.forEach(function(glyph) {
+      workChain.push(generateSprite(glyph.name, {
+        advWidth: glyph['horiz-adv-x'] || 1536,
+        path: glyph.d
+      }));
+    });
+    return Promise.all(workChain).then(function(lines) {
+      var outSvgSheet = fs.createWriteStream(outPath);
+      outSvgSheet.write('<svg height="0" width="0" style="position:absolute;margin-left: -100%;">\n');
+      outSvgSheet.write(lines.join('\n'));
+      outSvgSheet.end('\n<\/svg>\n');
+    });
+  }
+
+  function makeRequest(url) {
+    return request(extend(true, requestOptions, {
+      url: url
+    }))
+  }
+
+  return Promise.all([
+    makeRequest('https://raw.github.com/FortAwesome/Font-Awesome/master/src/icons.yml'),
+    makeRequest('https://raw.github.com/FortAwesome/Font-Awesome/master/fonts/fontawesome-webfont.svg')
+  ]).spread(function(iconsYaml, fontData) {
+      
+    fontData = fontData.toString('utf8');
+    var icons = yaml.safeLoad(iconsYaml).icons;
+    if (argv.icons) {
+      icons = icons.filter(function (icon) {
+        return argv.icons.indexOf(icon.id) >= 0;
+      });
+    }
+
+    Promise.each(icons, function(icon) {
+      return parseXml('<char>&#x'+icon.unicode + ';</char>').then(function(unicodeValue) {
+        code2name[unicodeValue.char.charCodeAt(0)] = icon.id;
+      });
+    }).then(function() {
+      return parseXml(fontData).then(function(result) {
+        return result.svg.defs[0].font[0].glyph;
+      }).map(function(glyph) {
+        var out = glyph.$;
+        out.name = code2name[out.unicode.charCodeAt(0)];
+        out.code = out.unicode.charCodeAt(0);
+        return out;;
+      });
+    }).then(function(glyphs) {
+      var outSvgSheet;
+
+      return glyphs.filter(function(glyph) {
+        return glyph.name;
+      });
+    }).map(function(glyph) {
+
+      if(color) {
+        return Promise.map(color.split(/,/), function(color) {
+          return generateIcon(glyph.name, extend(true, {}, {
+            advWidth: glyph['horiz-adv-x'] || 1536,
+            path: glyph.d,
+            color: color
+          }));
+        }, {concurrency: 1}).then(function() {
+          return glyph;
         });
       }
-      icons.forEach(function(icon) {
-        code2name[icon.unicode] = icon.id;
-      });
-
-      lines = fontData.split('\n');
-
-      async.eachLimit(lines, process.env['JOBS'] || 1, function(line, cb) {
-        var m = line.match(/^<glyph unicode="&#x([^"]+);"\s*(?:horiz-adv-x="(\d+)")?\s*d="([^"]+)"/);
-
-        if(m) {
-          var str = m[1];
-          if(code2name[str]) {
-            generateIcon(code2name[str], m[3], {advWidth: m[2]?m[2]:1536, color: argv.color }, cb);
-          }
-          else {
-            cb();
-          }
-        }
-        else
-          cb();
-      }, function(err, cb) {
-        if(err) {
-          console.log("Make sure 'rsvg-convert' command is available in the PATH");
-          return console.log("Error occured:", err);
-        }
-        if(outSvgSheet) {
-          outSvgSheet.end('<\/svg>\n');
-        }
-
-        console.log("All generated");
-      });
-
+      return glyph;
+    }, {concurrency: 1}).then(function(glyphs) {
+      if(argv.sprites) {
+        return generateSprites(glyphs);
+      }
+    }).then(function() {
+      console.log('All done!');
     });
   });
 }
 
-if (argv.png) {
-  var convertTest = spawn('rsvg-convert', ['--help']);
-  convertTest.once('error', function() {
-    console.warn("Error: cannot start `rsvg-convert` command. Please install it or verify that it is in your PATH.");
+function checkRsvg() {
+  return new Promise(function(resolve, reject) {
+    var convertTest = spawn('rsvg-convert', ['--help']);
+    convertTest.once('error', function() {
+      throw Error("Error: cannot start `rsvg-convert` command. Please install it or verify that it is in your PATH.");
+    });
+    convertTest.once('exit', function(code) {
+      if(code) return reject();
+      resolve();
+    });
   });
-  convertTest.once('exit', function() {
-    if(requestOptions.HTTPS_PROXY) return run();
+}
+
+function setupProxy() {
+  return new Promise(function(resolve, reject) {
+    if(requestOptions.HTTPS_PROXY) return resolve();
 
     var npm = spawn('npm', ['config', 'get', 'https-proxy']);
     npm.stdout.once('data', function(data) {
@@ -264,9 +293,18 @@ if (argv.png) {
         requestOptions.proxy = data;
       }
     });
-    npm.once('exit', run);
-    npm.once('error', run);
+    npm.once('exit', function(code) {
+      if(code) return reject(code);
+      return resolve();
+    });
+    npm.once('error', reject);
   });
-} else {
-  run();
 }
+
+Promise.resolve().then(function() {
+  var promise = Promise.resolve();
+  if(argv.png) {
+    promise = promise.then(checkRsvg);
+  }
+  return promise.then(setupProxy);
+}).then(run);
