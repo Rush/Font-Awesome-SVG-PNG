@@ -11,6 +11,8 @@ var assert = require('assert');
 
 var execFile = Promise.promisify(require('child_process').execFile);
 
+var getIconList = require("./lib/getIconList");
+
 var svgo = new SVGO({
   removeViewBox: true
 });
@@ -79,7 +81,7 @@ function run() {
 
   var PIXEL = 128;
 
-  
+
   function getTemplate(options, params) {
     var out = template.substr(0);
     params = extend({}, params, {
@@ -217,12 +219,11 @@ function run() {
   }
 
   return Promise.all([
-    makeRequest('https://raw.github.com/FortAwesome/Font-Awesome/master/src/icons.yml'),
+    getIconList(),
     makeRequest('https://raw.github.com/FortAwesome/Font-Awesome/master/fonts/fontawesome-webfont.svg')
-  ]).spread(function(iconsYaml, fontData) {
-      
+  ]).spread(function(icons, fontData) {
+
     fontData = fontData.toString('utf8');
-    var icons = yaml.safeLoad(iconsYaml).icons;
     if (argv.icons) {
       icons = icons.filter(function (icon) {
         return argv.icons.indexOf(icon.id) >= 0;
@@ -246,7 +247,7 @@ function run() {
         var out = glyph.$;
         out.name = code2name[out.unicode.charCodeAt(0)];
         out.code = out.unicode.charCodeAt(0);
-        return out;;
+        return out;
       });
     }).then(function(glyphs) {
       var outSvgSheet;
