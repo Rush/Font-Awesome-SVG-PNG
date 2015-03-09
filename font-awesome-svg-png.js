@@ -7,11 +7,10 @@ var Promise = require("bluebird");
 
 var parseXml = Promise.promisify(require('xml2js').parseString);
 
-var assert = require('assert');
-
 var execFile = Promise.promisify(require('child_process').execFile);
 
-var getIconList = require("./lib/getIconList");
+var getIconList = require("./lib/getIconList"),
+  getFontData = require("./lib/getFontData");
 
 var svgo = new SVGO({
   removeViewBox: true
@@ -27,12 +26,9 @@ var template =
 
 var spawn = require('child_process').spawn;
 var http = require('http');
-var request = require('request-promise');
-var yaml = require('js-yaml');
 var extend = require('extend');
 
 var pathModule = require('path');
-var async = require('async');
 
 var code2name = {};
 
@@ -212,18 +208,8 @@ function run() {
     });
   }
 
-  function makeRequest(url) {
-    return request(extend(true, requestOptions, {
-      url: url
-    }))
-  }
+  return Promise.all([ getIconList(),  getFontData() ]).spread(function(icons, fontData) {
 
-  return Promise.all([
-    getIconList(),
-    makeRequest('https://raw.github.com/FortAwesome/Font-Awesome/master/fonts/fontawesome-webfont.svg')
-  ]).spread(function(icons, fontData) {
-
-    fontData = fontData.toString('utf8');
     if (argv.icons) {
       icons = icons.filter(function (icon) {
         return argv.icons.indexOf(icon.id) >= 0;

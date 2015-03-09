@@ -16,15 +16,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "async": "~0.2.10",
     "bluebird": "^2.9.13",
     "extend": "~1.2.1",
     "font-awesome": "^4.3.0",
     "graceful-fs": "~2.0.1",
-    "html-entities": "^1.1.2",
-    "js-yaml": "~3.0.1",
     "optimist": "~0.6.0",
-    "request-promise": "^0.4.0",
     "svgo": "0.4.4",
     "xml2js": "^0.4.5"
   }
