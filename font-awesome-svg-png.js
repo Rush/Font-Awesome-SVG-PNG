@@ -194,8 +194,8 @@ function run() {
     var workChain = [];
     glyphs.forEach(function(glyph) {
       workChain.push(generateSprite(glyph.name, {
-        advWidth: glyph['horiz-adv-x'] || 1536,
-        path: glyph.d
+        advWidth: glyph.glyphData['horiz-adv-x'] || 1536,
+        path: glyph.glyphData.d
       }));
     });
     return Promise.all(workChain).then(function(lines) {
@@ -226,13 +226,17 @@ function run() {
     });
 
     return Promise.all(icons).map(function (icon) {
-        var glyph = glyphMap[icon.unicodeDec];
+        var glyph = {
+          glyphData: glyphMap[icon.unicodeDec].glyphData,
+          unicodeDec: icon.unicodeDec,
+          name: icon.id
+        };
 
         if (color) {
           return Promise.map(color.split(/,/), function (color) {
             return generateIcon(icon.id, extend(true, {}, {
-              advWidth: glyph['horiz-adv-x'] || 1536,
-              path: glyph.d,
+              advWidth: glyph.glyphData['horiz-adv-x'] || 1536,
+              path: glyph.glyphData.d,
               color: color
             }));
           }, {concurrency: 1}).then(function() {
