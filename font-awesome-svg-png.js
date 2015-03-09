@@ -206,7 +206,7 @@ function run() {
     });
   }
 
-  return Promise.all([ getIconList(),  getFontData() ]).spread(function(icons, fontData) {
+  return Promise.all([ getIconList(),  getFontData() ]).spread(function(icons, glyphs) {
 
     if (argv.icons) {
       icons = icons.filter(function (icon) {
@@ -220,44 +220,33 @@ function run() {
       process.exit();
     }
 
-    var code2name = {};
-
-    icons.forEach(function (icon) {
-      code2name[icon.unicodeDec] = icon.id;
+    var glyphMap = {};
+    glyphs.forEach(function (glyph) {
+      glyphMap[glyph.unicodeDec] = glyph;
     });
 
-    parseXml(fontData).then(function(result) {
-      return result.svg.defs[0].font[0].glyph;
-    }).map(function(glyph) {
-      var out = glyph.$;
-      out.code = out.unicode.charCodeAt(0);
-      out.name = code2name[out.code];
-      return out;
-    }).then(function(glyphs) {
-      return glyphs.filter(function(glyph) {
-        return glyph.name;
+    return Promise.all(icons).map(function (icon) {
+        var glyph = glyphMap[icon.unicodeDec];
+
+        if (color) {
+          return Promise.map(color.split(/,/), function (color) {
+            return generateIcon(icon.id, extend(true, {}, {
+              advWidth: glyph['horiz-adv-x'] || 1536,
+              path: glyph.d,
+              color: color
+            }));
+          }, {concurrency: 1}).then(function() {
+              return glyph;
+            });
+        }
+        return glyph;
+      }, {concurrency: 1}).then(function(glyphs) {
+        if(argv.sprites) {
+          return generateSprites(glyphs);
+        }
+      }).then(function() {
+        console.log('All done!');
       });
-    }).map(function(glyph) {
-
-      if(color) {
-        return Promise.map(color.split(/,/), function(color) {
-          return generateIcon(glyph.name, extend(true, {}, {
-            advWidth: glyph['horiz-adv-x'] || 1536,
-            path: glyph.d,
-            color: color
-          }));
-        }, {concurrency: 1}).then(function() {
-          return glyph;
-        });
-      }
-      return glyph;
-    }, {concurrency: 1}).then(function(glyphs) {
-      if(argv.sprites) {
-        return generateSprites(glyphs);
-      }
-    }).then(function() {
-      console.log('All done!');
-    });
   });
 }
 
