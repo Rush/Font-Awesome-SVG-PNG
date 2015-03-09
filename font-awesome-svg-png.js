@@ -15,6 +15,7 @@ var argv = optimist
   .describe('optipng', "Run each file through optipng (need to be installed)")
   .describe('svg', "Generate SVG files")
   .describe('icons', "Optional list of icons to generate, e.g. --icons phone,star")
+  .describe('dest', "Output folder")
   .describe('list', "List available icons")
   .describe('help', "Show this help screen")
   .default({
@@ -23,7 +24,8 @@ var argv = optimist
     nopadding: false,
     optipng: false,
     png: true,
-    svg: true
+    svg: true,
+    dest: "./"
   }).argv;
 
 if (argv.help) {
