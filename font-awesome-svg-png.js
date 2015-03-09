@@ -5,12 +5,9 @@ var SVGO = require('svgo');
 
 var Promise = require("bluebird");
 
-var parseXml = Promise.promisify(require('xml2js').parseString);
-
 var execFile = Promise.promisify(require('child_process').execFile);
 
-var getIconList = require("./lib/getIconList"),
-  getFontData = require("./lib/getFontData");
+var getGlyphs = require("./lib/getGlyphs");
 
 var svgo = new SVGO({
   removeViewBox: true
@@ -193,9 +190,9 @@ function run() {
     console.log('Generating sprites to', outPath);
     var workChain = [];
     glyphs.forEach(function(glyph) {
-      workChain.push(generateSprite(glyph.name, {
-        advWidth: glyph.glyphData['horiz-adv-x'] || 1536,
-        path: glyph.glyphData.d
+      workChain.push(generateSprite(glyph.id, {
+        advWidth: glyph.data['horiz-adv-x'] || 1536,
+        path: glyph.data.d
       }));
     });
     return Promise.all(workChain).then(function(lines) {
@@ -206,51 +203,44 @@ function run() {
     });
   }
 
-  return Promise.all([ getIconList(),  getFontData() ]).spread(function(icons, glyphs) {
+
+  if(argv.list) {
+    // not generating anything
+    return getGlyphs().then(function (glyphs) {
+      console.log(glyphs.map(function (glyphs) {
+        return glyphs.id;
+      }));
+    });
+  }
+
+  return getGlyphs().then(function (glyphs) {
 
     if (argv.icons) {
-      icons = icons.filter(function (icon) {
-        return argv.icons.indexOf(icon.id) >= 0;
-      });
-    }
-    if(argv.list) {
-      console.log(icons.map(function(icon) {
-        return icon.id;
-      }));
-      process.exit();
+        glyphs = glyphs.filter(function (glyph) {
+          return argv.icons.indexOf(glyph.id) >= 0;
+        });
     }
 
-    var glyphMap = {};
-    glyphs.forEach(function (glyph) {
-      glyphMap[glyph.unicodeDec] = glyph;
+    if (color) {
+      var iconsPromise = Promise.map(glyphs, function (glyph) {
+        return Promise.map(color.split(/,/), function (color) {
+          return generateIcon(glyph.id, extend(true, {}, {
+            advWidth: glyph.data['horiz-adv-x'] || 1536,
+            path: glyph.data.d,
+            color: color
+          }));
+        }, {concurrency: 1})
+      });
+    }
+
+    if(argv.sprites) {
+      var spritesPromise = generateSprites(glyphs);
+    }
+
+    return Promise.all([ iconsPromise, spritesPromise ]).then(function() {
+      console.log('All done!');
     });
 
-    return Promise.all(icons).map(function (icon) {
-        var glyph = {
-          glyphData: glyphMap[icon.unicodeDec].glyphData,
-          unicodeDec: icon.unicodeDec,
-          name: icon.id
-        };
-
-        if (color) {
-          return Promise.map(color.split(/,/), function (color) {
-            return generateIcon(icon.id, extend(true, {}, {
-              advWidth: glyph.glyphData['horiz-adv-x'] || 1536,
-              path: glyph.glyphData.d,
-              color: color
-            }));
-          }, {concurrency: 1}).then(function() {
-              return glyph;
-            });
-        }
-        return glyph;
-      }, {concurrency: 1}).then(function(glyphs) {
-        if(argv.sprites) {
-          return generateSprites(glyphs);
-        }
-      }).then(function() {
-        console.log('All done!');
-      });
   });
 }
 

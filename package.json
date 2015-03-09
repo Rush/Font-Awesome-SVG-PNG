@@ -20,6 +20,7 @@
     "extend": "~1.2.1",
     "font-awesome": "^4.3.0",
     "graceful-fs": "~2.0.1",
+    "lodash.indexby": "^3.0.0",
     "optimist": "~0.6.0",
     "svgo": "0.4.4",
     "xml2js": "^0.4.5"
