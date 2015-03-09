@@ -30,8 +30,6 @@ var extend = require('extend');
 
 var pathModule = require('path');
 
-var code2name = {};
-
 var argv = require('optimist')
   .usage("Usage:\n  $0 --sprites\n  $0 --color white --no-png\n  $0 --color black --no-svg\n  $0 --sprites --color black,white --optipng")
   .describe('sizes', "Provide comma separated sizes to generate")
@@ -222,22 +220,20 @@ function run() {
       process.exit();
     }
 
-    Promise.each(icons, function(icon) {
-      return parseXml('<char>&#x'+icon.unicode + ';</char>').then(function(unicodeValue) {
-        code2name[unicodeValue.char.charCodeAt(0)] = icon.id;
-      });
-    }).then(function() {
-      return parseXml(fontData).then(function(result) {
-        return result.svg.defs[0].font[0].glyph;
-      }).map(function(glyph) {
-        var out = glyph.$;
-        out.name = code2name[out.unicode.charCodeAt(0)];
-        out.code = out.unicode.charCodeAt(0);
-        return out;
-      });
-    }).then(function(glyphs) {
-      var outSvgSheet;
+    var code2name = {};
 
+    icons.forEach(function (icon) {
+      code2name[icon.unicodeDec] = icon.id;
+    });
+
+    parseXml(fontData).then(function(result) {
+      return result.svg.defs[0].font[0].glyph;
+    }).map(function(glyph) {
+      var out = glyph.$;
+      out.code = out.unicode.charCodeAt(0);
+      out.name = code2name[out.code];
+      return out;
+    }).then(function(glyphs) {
       return glyphs.filter(function(glyph) {
         return glyph.name;
       });
