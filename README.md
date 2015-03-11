@@ -48,4 +48,5 @@ sudo apt-get install librsvg2-bin
 ```
 
 ##Authors
-  Damian Kaczmarek <damian@codecharm.co.uk>
+  Damian Kaczmarek <damian@codecharm.co.uk> @Rush
+  Dominykas Blyžė <hello@dominykas.com> @dominykas

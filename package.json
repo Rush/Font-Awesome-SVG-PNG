@@ -7,6 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Damian Kaczmarek <damian@codecharm.co.uk>",
+  "contributors": [
+    "Dominykas Blyžė <hello@dominykas.com>"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/encharm/Font-Awesome-SVG-PNG"
