@@ -35,7 +35,7 @@ You can skip PNG creation with `--no-png`.
 ### Windows support
 1. Install node.js: https://nodejs.org/en/#download
 2. Open cmd.exe in the Font-Awesome-SVG-PNG directory
-3  Execute `npm install .`
+3.  Execute `npm install .`
 4. Download https://osspack32.googlecode.com/files/rsvg-convert.exe
 5. Add the directory of rsvg-convert.exe to your PATH
 6. Try it by executing `node font-awesome-svg-png --color gray --sizes 16`
