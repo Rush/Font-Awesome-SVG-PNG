@@ -38,8 +38,12 @@ Everything should work once you have `rsvg-convert.exe`. You may get it from htt
 ### Mac OS X support
 ```
 sudo port install librsvg
+... or ...
+brew install librsvg
 ```
 That should give the necessary `rsvg-convert` command.
+
+WARNING: Starting from librsvg 2.40.11 and onwards `rsvg-convert` produces empty images due to a breaking change that was introduced. At moment there's no workaround but to revert to librsvg 2.40.10 and below.
 
 ### Linux support
 For Debian `rsvg-convert` in located in the `librsvg2-bin` package.
