@@ -4,7 +4,7 @@ Font-Awesome-SVG-PNG
 This project provides a Font-Awesome build split to individual SVG and PNG files of different sizes along with Node.JS based generator to generate any other colors and sizes combinations.
 
 ## What is Font-Awesome?
-Font Awesome is a full suite of 519 pictographic icons for easy scalable vector graphics on websites, created and
+Font Awesome is a full suite of 605 pictographic icons for easy scalable vector graphics on websites, created and
 maintained by [Dave Gandy](http://twitter.com/davegandy). Stay up to date [@fontawesome](http://twitter.com/fontawesome).
 
 Get started at http://fontawesome.io!
@@ -38,8 +38,12 @@ Everything should work once you have `rsvg-convert.exe`. You may get it from htt
 ### Mac OS X support
 ```
 sudo port install librsvg
+... or ...
+brew install librsvg
 ```
 That should give the necessary `rsvg-convert` command.
+
+WARNING: Starting from librsvg 2.40.11 and onwards `rsvg-convert` produces empty images due to a breaking change that was introduced. At moment there's no workaround but to revert to librsvg 2.40.10 and below.
 
 ### Linux support
 For Debian `rsvg-convert` in located in the `librsvg2-bin` package.
