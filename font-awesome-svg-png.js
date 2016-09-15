@@ -73,5 +73,5 @@ if (argv.color && argv.png) {
 Promise.all(commandChecks).then(function () {
   return libFontAwesome.generate(argv);
 }).catch(function (err) {
-  console.error("Cought error", err);
+  console.error("Caught error", err);
 });
