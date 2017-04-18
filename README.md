@@ -51,6 +51,6 @@ For Debian `rsvg-convert` in located in the `librsvg2-bin` package.
 sudo apt-get install librsvg2-bin
 ```
 
-##Authors
+## Authors
 - Damian Kaczmarek <rush@rushbase.net> [@Rush](https://github.com/Rush)
 - Dominykas Blyžė <hello@dominykas.com> [@dominykas](https://github.com/dominykas)
