@@ -1,10 +1,11 @@
 {
   "name": "font-awesome-svg-png",
-  "version": "1.1.5",
+  "version": "1.2.0",
   "description": "Font Awesome split to individual SVG and PNG files of different sizes along with Node.JS based generator",
   "main": "font-awesome-svg-png",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate": "node font-awesome-svg-png.js --color black,white --png --svg --optipng"
   },
   "author": "Damian Kaczmarek <damian@codecharm.co.uk>",
   "contributors": [
