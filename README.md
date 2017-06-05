@@ -4,7 +4,7 @@ Font-Awesome-SVG-PNG
 This project provides a Font-Awesome build split to individual SVG and PNG files of different sizes along with Node.JS based generator to generate any other colors and sizes combinations.
 
 ## What is Font-Awesome?
-Font Awesome is a full suite of 605 pictographic icons for easy scalable vector graphics on websites, created and
+Font Awesome is a full suite of 675 pictographic icons for easy scalable vector graphics on websites, created and
 maintained by [Dave Gandy](http://twitter.com/davegandy). Stay up to date [@fontawesome](http://twitter.com/fontawesome).
 
 Get started at http://fontawesome.io!
@@ -33,7 +33,12 @@ PNG creation depends on `rsvg-convert` command being in the path.
 You can skip PNG creation with `--no-png`.
 
 ### Windows support
-Everything should work once you have `rsvg-convert.exe`. You may get it from https://osspack32.googlecode.com/files/rsvg-convert.exe and move to `%PATH%`.
+1. Install node.js: https://nodejs.org/en/#download
+2. Open cmd.exe in the Font-Awesome-SVG-PNG directory
+3.  Execute `npm install .`
+4. Download https://osspack32.googlecode.com/files/rsvg-convert.exe
+5. Add the directory of rsvg-convert.exe to your PATH
+6. Try it by executing `node font-awesome-svg-png --color gray --sizes 16`
 
 ### Mac OS X support
 ```
