@@ -59,3 +59,8 @@ sudo apt-get install librsvg2-bin
 ## Authors
 - Damian Kaczmarek <rush@rushbase.net> [@Rush](https://github.com/Rush)
 - Dominykas Blyžė <hello@dominykas.com> [@dominykas](https://github.com/dominykas)
+
+## See also
+
+You may also be interested in the following projects:
+- [Dellos7/local-icons](https://github.com/Dellos7/local-icons). List of CSS classes that allow you to use the **Font-Awesome-SVG-PNG** icons in your HTML & CSS in a very easy way. Just copy/paste - no need to import external CSS stylesheets.
