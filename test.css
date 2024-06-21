@@ -9891,14 +9891,14 @@ Description: Bootstrap 4 with Sass
                flex-direction: column;
        gap: 1rem; } }
    .button-block-buttons .button-block-button {
-     max-width: 225px;
+     max-width: 285px;
      width: 100%;
      padding: 1rem 2rem; }
      @media (max-width: 61.9375rem) {
        .button-block-buttons .button-block-button {
          max-width: 200px !important; } }
      .button-block-buttons .button-block-button a {
-       font-size: 1.25rem;
+       font-size: 1.5rem;
        padding: 0; }
        .button-block-buttons .button-block-button a:hover {
          text-decoration: none; }
@@ -10370,7 +10370,7 @@ Description: Bootstrap 4 with Sass
    margin-left: auto; }
  
  /* Lung Cancer Styles */
- .page-node-63 .node--type-page.node--view-mode-banner .banner-title-region:after, .page-node-3 .node--type-page.node--view-mode-banner .banner-title-region:after, .page-node-43 .node--type-page.node--view-mode-banner .banner-title-region:after, .page-node-45 .node--type-page.node--view-mode-banner .banner-title-region:after {
+ .page-node-54 .node--type-page.node--view-mode-banner .banner-title-region:after, .page-node-3 .node--type-page.node--view-mode-banner .banner-title-region:after, .page-node-43 .node--type-page.node--view-mode-banner .banner-title-region:after, .page-node-45 .node--type-page.node--view-mode-banner .banner-title-region:after {
    background-image: url(/themes/custom/noonemissed/images/arrow_yellow-transparent.png) !important; }
  
  .page-node-45 .node--type-page.node--view-mode-banner .banner-title-region:after {
@@ -10381,27 +10381,27 @@ Description: Bootstrap 4 with Sass
    top: -105px;
    right: -35%; }
  
- .page-node-63 header, .page-node-3 header, .page-node-43 header, .page-node-45 header {
+ .page-node-54 header, .page-node-3 header, .page-node-43 header, .page-node-45 header {
    background-color: #00206b !important; }
  
- .page-node-63 .lung-hub-text {
+ .page-node-54 .lung-hub-text {
    max-width: 600px;
    margin: 0 auto 3.125rem; }
  
- .page-node-63 .banner-title h2, .page-node-63 .banner-title .h2, .page-node-3 .banner-title h2, .page-node-3 .banner-title .h2 {
+ .page-node-54 .banner-title h2, .page-node-54 .banner-title .h2, .page-node-3 .banner-title h2, .page-node-3 .banner-title .h2 {
    font-family: 'Poppins', sans-serif !important;
    font-size: 2.125rem !important;
    font-weight: normal !important;
    line-height: 1.6 !important;
    color: #68d2df !important; }
  
- .page-node-63 .banner-title-region h3, .page-node-63 .banner-title-region .h3, .page-node-3 .banner-title-region h3, .page-node-3 .banner-title-region .h3, .page-node-43 .banner-title-region h3, .page-node-43 .banner-title-region .h3 {
+ .page-node-54 .banner-title-region h3, .page-node-54 .banner-title-region .h3, .page-node-3 .banner-title-region h3, .page-node-3 .banner-title-region .h3, .page-node-43 .banner-title-region h3, .page-node-43 .banner-title-region .h3 {
    font-family: 'Oswald', sans-serif;
    color: #ecd920;
    font-size: 1.75rem;
    line-height: 1.4; }
  
- .page-node-63 header:after, .page-node-3 header:after, .page-node-43 header:after, .page-node-45 header:after {
+ .page-node-54 header:after, .page-node-3 header:after, .page-node-43 header:after, .page-node-45 header:after {
    content: '';
    position: absolute;
    width: 100%;
@@ -10410,15 +10410,15 @@ Description: Bootstrap 4 with Sass
    top: 0; }
  
  @media (max-width: 61.9375rem) {
-   .page-node-63 header:after, .page-node-3 header:after, .page-node-43 header:after, .page-node-45 header:after {
+   .page-node-54 header:after, .page-node-3 header:after, .page-node-43 header:after, .page-node-45 header:after {
      background-color: #00206b !important; } }
  
  @media (max-width: 47.9375rem) {
-   .page-node-63 .navbar-collapse, .page-node-3 .navbar-collapse, .page-node-43 .navbar-collapse, .page-node-45 .navbar-collapse {
+   .page-node-54 .navbar-collapse, .page-node-3 .navbar-collapse, .page-node-43 .navbar-collapse, .page-node-45 .navbar-collapse {
      background-color: #00206b !important; }
-   .page-node-61 .navbar-collapse {
+   .page-node-53 .navbar-collapse {
      background-color: #01403A !important; }
-   .page-node-62 .navbar-collapse {
+   .page-node-55 .navbar-collapse {
      background-color: #54204a !important; } }
  
  /* Breast Cancer Styles */
@@ -10492,33 +10492,33 @@ Description: Bootstrap 4 with Sass
  .arrow-light-red-overlay {
    padding: 0.9375rem 2.1875rem; }
  
- .page-node-62 .node--type-page.node--view-mode-banner .banner-title-region:after {
+ .page-node-55 .node--type-page.node--view-mode-banner .banner-title-region:after {
    background-image: url(/themes/custom/noonemissed/images/arrow_red-transparent.png) !important; }
  
- .page-node-62 header {
+ .page-node-55 header {
    background-color: #54204A !important; }
  
- .page-node-62 .banner-title {
+ .page-node-55 .banner-title {
    max-width: unset !important; }
  
- .page-node-62 .banner-title h2, .page-node-62 .banner-title .h2 {
+ .page-node-55 .banner-title h2, .page-node-55 .banner-title .h2 {
    color: #f69181 !important; }
  
- .page-node-62 .banner-title-region h3, .page-node-62 .banner-title-region .h3 {
+ .page-node-55 .banner-title-region h3, .page-node-55 .banner-title-region .h3 {
    color: #EACCC0 !important;
    max-width: 480px;
    margin-bottom: 2.8125rem; }
  
  @media (max-width: 61.9375rem) {
-   .page-node-62 header:after {
+   .page-node-55 header:after {
      background-color: #54204A !important; } }
  
  @media (max-width: 74.9375rem) {
-   .page-node-61 .banner-title-region:after {
+   .page-node-53 .banner-title-region:after {
      right: -160px !important; } }
  
  @media (min-width: 48rem) {
-   .page-node-61 .navbar-nav li.nav-item:not(:last-of-type) {
+   .page-node-53 .navbar-nav li.nav-item:not(:last-of-type) {
      margin-right: 1rem; } }
  
  .navbar.affix > div.container {
@@ -10526,14 +10526,6 @@ Description: Bootstrap 4 with Sass
    -webkit-align-items: center !important;
        -ms-flex-align: center !important;
            align-items: center !important; }
- 
- .image-overlay-text {
-   max-width: 520px;
-   margin-top: -4.6875rem !important; }
- 
- @media (min-width: 48.875rem) {
-   .wp-block-column:not(:first-child) {
-     padding-left: 4em; } }
  
  header {
    position: relative;
@@ -10729,14 +10721,11 @@ Description: Bootstrap 4 with Sass
      content: '' !important; }
  
  .block-views-blocknode-content-block-1,
- .block-views-blocknode-content-block-5,
- .block-views-blocknode-content-block-8 {
+ .block-views-blocknode-content-block-5 {
    margin: 4rem 0; }
    .block-views-blocknode-content-block-1 h3, .block-views-blocknode-content-block-1 .h3,
    .block-views-blocknode-content-block-5 h3,
-   .block-views-blocknode-content-block-5 .h3,
-   .block-views-blocknode-content-block-8 h3,
-   .block-views-blocknode-content-block-8 .h3 {
+   .block-views-blocknode-content-block-5 .h3 {
      font-family: 'Oswald', sans-serif;
      color: #6E6E6E;
      font-size: 0.875rem;
@@ -10749,11 +10738,7 @@ Description: Bootstrap 4 with Sass
      .block-views-blocknode-content-block-5 h3:before,
      .block-views-blocknode-content-block-5 .h3:before,
      .block-views-blocknode-content-block-5 h3:after,
-     .block-views-blocknode-content-block-5 .h3:after,
-     .block-views-blocknode-content-block-8 h3:before,
-     .block-views-blocknode-content-block-8 .h3:before,
-     .block-views-blocknode-content-block-8 h3:after,
-     .block-views-blocknode-content-block-8 .h3:after {
+     .block-views-blocknode-content-block-5 .h3:after {
        border-top: 1px solid #999;
        content: '';
        display: table-cell;
