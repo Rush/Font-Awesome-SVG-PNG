@@ -1,7 +1,7 @@
 Font-Awesome-SVG-PNG
 ====================
 
-This project provides a Font-Awesome build split to individual SVG and PNG files of different sizes along with Node.JS based generator to generate any other colors and sizes combinations.
+This project provides  Font-Awesome build split to individual SVG and PNG files of different sizes along with Node.JS based generator to generate any other colors and sizes combinations.
 
 ## What is Font-Awesome?
 Font Awesome is a full suite of 675 pictographic icons for easy scalable vector graphics on websites, created and
